@@ -932,7 +932,8 @@ public class OFSwitch implements IOFSwitchBackend {
 		this.capabilities = featuresReply.getCapabilities();
 		this.buffers = featuresReply.getNBuffers();
 
-		if (featuresReply.getVersion().compareTo(OFVersion.OF_13) < 0 ) {
+		/* OF1.1+ OFPT_FEATURES_REPLY does not contain actions, this field is reserved */
+		if (featuresReply.getVersion().compareTo(OFVersion.OF_11) < 0 ) {
 			/* OF1.3+ Per-table actions are set later in the OFTableFeaturesRequest/Reply */
 			this.actions = featuresReply.getActions();
 		}
