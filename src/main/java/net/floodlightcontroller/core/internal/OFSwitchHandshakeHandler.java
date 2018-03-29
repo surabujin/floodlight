@@ -452,10 +452,10 @@ public class OFSwitchHandshakeHandler implements IOFConnectionListener {
 			/*
 			 * Make sure we allow these operations to complete before proceeding.
 			 */
-			OFBarrierRequest barrier = factory.buildBarrierRequest()
-					.setXid(handshakeTransactionIds--)
-					.build();
-			sw.write(barrier);
+//			OFBarrierRequest barrier = factory.buildBarrierRequest()
+//					.setXid(handshakeTransactionIds--)
+//					.build();
+//			sw.write(barrier);
 		}
 	}
 
@@ -1210,7 +1210,7 @@ public class OFSwitchHandshakeHandler implements IOFConnectionListener {
 		/**
 		 * Initialize the plugin and begin.
 		 *
-		 * @param plugin the of switch app handshake plugin
+
 		 */
 		public void enterNextPlugin() {
 			if(this.pluginIterator.hasNext()){
@@ -1361,7 +1361,7 @@ public class OFSwitchHandshakeHandler implements IOFConnectionListener {
 				clearAllTables();
 			}
 
-			sendBarrier(); /* Need to make sure the tables are clear before adding default flows */
+//			sendBarrier(); /* Need to make sure the tables are clear before adding default flows */
 			// addDefaultFlows();
 
 			/*
@@ -1369,7 +1369,7 @@ public class OFSwitchHandshakeHandler implements IOFConnectionListener {
 			 * transition to master. Some modules might modify the flow tables and expect 
 			 * the clear/default flow operations above to have completed.
 			 */
-			sendBarrier();
+//			sendBarrier();
 
 			setSwitchStatus(SwitchStatus.MASTER);
 		}
@@ -1815,7 +1815,8 @@ public class OFSwitchHandshakeHandler implements IOFConnectionListener {
 		OFGetConfigRequest configReq = factory.buildGetConfigRequest()
 				.setXid(handshakeTransactionIds--)
 				.build();
-		List<OFMessage> msgList = ImmutableList.<OFMessage>of(configSet, barrier, configReq);
+//		List<OFMessage> msgList = ImmutableList.<OFMessage>of(configSet, barrier, configReq);
+		List<OFMessage> msgList = ImmutableList.<OFMessage>of(configSet, configReq);
 		mainConnection.write(msgList);
 	}
 
