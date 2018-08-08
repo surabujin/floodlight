@@ -1367,7 +1367,7 @@ public class OFSwitchHandshakeHandler implements IOFConnectionListener {
 			}
 
 			sendBarrier(); /* Need to make sure the tables are clear before adding default flows */
-			addDefaultFlows();
+			// addDefaultFlows();
 
 			/*
 			 * We also need a barrier between adding flows and notifying modules of the

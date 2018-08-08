@@ -1,0 +1,15 @@
+--- src/main/java/net/floodlightcontroller/core/internal/OFSwitchHandshakeHandler.java
++++ src/main/java/net/floodlightcontroller/core/internal/OFSwitchHandshakeHandler.java
+@@ -442,8 +444,10 @@ public class OFSwitchHandshakeHandler implements IOFConnectionListener {
+ 			this.sw.write(delgroup.build());
+ 			delgroup.setGroupType(OFGroupType.FF);
+ 			this.sw.write(delgroup.build());
+-			delgroup.setGroupType(OFGroupType.INDIRECT);
+-			this.sw.write(delgroup.build());
++			if (this.sw.getOFFactory().getVersion().compareTo(OFVersion.OF_12) > 0) {
++				delgroup.setGroupType(OFGroupType.INDIRECT);
++				this.sw.write(delgroup.build());
++			}
+ 			delgroup.setGroupType(OFGroupType.SELECT);
+ 			this.sw.write(delgroup.build());
+ 
