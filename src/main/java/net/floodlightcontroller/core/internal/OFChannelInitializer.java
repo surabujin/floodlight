@@ -165,7 +165,7 @@ public class OFChannelInitializer extends ChannelInitializer<Channel> {
 	 * Timeouts for parts of the handshake, in seconds
 	 */
 	 public static class PipelineHandshakeTimeout {
-		 final static int CHANNEL = 10;
+		 final static int CHANNEL = 60;
 		 public final static int SWITCH = 30;
 	 }
 
