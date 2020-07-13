@@ -1313,19 +1313,14 @@ public class OFSwitchHandshakeHandler implements IOFConnectionListener {
 		@Override
 		void enterState(){
 			//sendRoleRequest(roleManager.getOFControllerRole());//original
-			/**
+			/*
 			 * Tulio Ribeiro
 			 * Retrieve role from floodlightdefault.properties configuration file
 			 * swId;Role 00:00:00:00:00:00:00:01;ROLE_SLAVE
-			 * If not defined there, the role will be set as MASTER
 			 */
-			OFControllerRole role = OFControllerRole.ROLE_MASTER;
-			if(OFSwitchManager.switchInitialRole != null)
-				if(OFSwitchManager.switchInitialRole.containsKey(mainConnection.getDatapathId())){
-					role = OFSwitchManager.switchInitialRole.get(mainConnection.getDatapathId());
-					log.info("Defining switch role from config file: {}", role);				
-				}	
-			sendRoleRequest(role);			
+			OFControllerRole role = switchManager.getInitialControllerRole(mainConnection.getDatapathId());
+			log.info("Defining switch role from config file: {}", role);
+			sendRoleRequest(role);
 		}
 	}
 

@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -127,7 +128,8 @@ IHAListener, IFloodlightModule, IOFSwitchService, IStoreListener<DatapathId> {
     private static ConcurrentHashMap<DatapathId, IOFSwitchBackend> switches;
     private static ConcurrentHashMap<DatapathId, IOFSwitch> syncedSwitches;
 
-    protected static Map<DatapathId, OFControllerRole> switchInitialRole;
+    private OFControllerRole defaultInitialRole = OFControllerRole.ROLE_MASTER;
+    private Map<DatapathId, OFControllerRole> switchInitialRoles = Collections.emptyMap();
 
     private static ISwitchDriverRegistry driverRegistry;
 
@@ -260,6 +262,11 @@ IHAListener, IFloodlightModule, IOFSwitchService, IStoreListener<DatapathId> {
 
     @Override public void handshakeDisconnected(DatapathId dpid) {
         switchHandlers.remove(dpid);
+    }
+
+    @Override
+    public OFControllerRole getInitialControllerRole(DatapathId dpid) {
+        return switchInitialRoles.getOrDefault(dpid, defaultInitialRole);
     }
 
     public Iterable<IOFSwitch> getActiveSwitches() {
@@ -697,11 +704,21 @@ IHAListener, IFloodlightModule, IOFSwitchService, IStoreListener<DatapathId> {
             OFSwitchManager.clearTablesOnEachTransitionToMaster = true;
         }
 
-
-        //Define initial role per switch		
+        // Define initial role per switch
+        String rawDefaultInitialRole = configParams.get("defaultInitialRole");
+        Optional<OFControllerRole> decodeDefaultInitialRole = decodeControllerRole(rawDefaultInitialRole);
+        if (decodeDefaultInitialRole.isPresent()) {
+            defaultInitialRole = decodeDefaultInitialRole.get();
+            log.info("Default controller role is {}", defaultInitialRole);
+        } else if (rawDefaultInitialRole == null) {
+            log.info("Default controller role is {} (built-in)", defaultInitialRole);
+        } else {
+            log.error("Can't decode defaultInitialRole value \"{}\" keep built-in value \"{}\"",
+                    rawDefaultInitialRole, defaultInitialRole);
+        }
         String switchesInitialState = configParams.get("switchesInitialState");
-        switchInitialRole = jsonToSwitchInitialRoleMap(switchesInitialState);
-        log.debug("SwitchInitialRole: {}", switchInitialRole.entrySet());
+        switchInitialRoles = jsonToSwitchInitialRoleMap(switchesInitialState);
+        log.debug("SwitchInitialRole: {}", switchInitialRoles.entrySet());
 
         /*
          * Get default max table for forward to controller flows. 
@@ -1222,7 +1239,6 @@ IHAListener, IFloodlightModule, IOFSwitchService, IStoreListener<DatapathId> {
         }
     }
 
-
     /**
      * Tulio Ribeiro
      * @param String json
@@ -1249,29 +1265,32 @@ IHAListener, IFloodlightModule, IOFSwitchService, IStoreListener<DatapathId> {
                 throw new IOException("Expected START_OBJECT");
             }
 
+            String errorPrefix = "Invalid switch initial role record";
             while (jp.nextToken() != JsonToken.END_OBJECT) {
                 if (jp.getCurrentToken() != JsonToken.FIELD_NAME) {
                     throw new IOException("Expected FIELD_NAME");
                 }
 
                 String n = jp.getCurrentName();
+                DatapathId dpid;
+                try {
+                    n = n.trim();
+                    dpid = DatapathId.of(n);
+                } catch (NumberFormatException e) {
+                    log.error("{} - bad DPID value \"{}\"", errorPrefix, n);
+                    continue;
+                }
+
                 jp.nextToken();
                 if (jp.getText().equals("")) {
                     continue;
                 }
-
-                DatapathId dpid;
-                OFControllerRole ofcr=OFControllerRole.ROLE_NOCHANGE;
-
-                try {
-                    n = n.trim();
-                    dpid = DatapathId.of(n);
-                    ofcr = OFControllerRole.valueOf(jp.getText());
-                    retValue.put(dpid, ofcr);
-
-                } catch (NumberFormatException e) {
-                    log.error("Invalid DPID format: {}, or OFControllerRole: {}", n, ofcr);
+                Optional<OFControllerRole> ofcr = decodeControllerRole(jp.getText());
+                if (! ofcr.isPresent()) {
+                    log.error("{} - bad role value \"{}\"", errorPrefix, jp.getText());
+                    continue;
                 }
+                retValue.put(dpid, ofcr.get());
             }
         } catch (IOException e) {
             log.error("Problem: {}", e);
@@ -1281,4 +1300,14 @@ IHAListener, IFloodlightModule, IOFSwitchService, IStoreListener<DatapathId> {
 
     @Override
     public void addSwitchEvent(DatapathId switchDpid, String reason, boolean flushNow) {}
+
+    private static Optional<OFControllerRole> decodeControllerRole(String value) {
+        Optional<OFControllerRole> decoded;
+        try {
+            decoded = Optional.of(OFControllerRole.valueOf(value));
+        } catch (IllegalArgumentException | NullPointerException e) {
+            decoded = Optional.empty();
+        }
+        return decoded;
+    }
 }

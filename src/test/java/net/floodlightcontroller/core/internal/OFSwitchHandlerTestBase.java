@@ -156,6 +156,7 @@ public abstract class OFSwitchHandlerTestBase {
 		SwitchManagerCounters counters =
 				new SwitchManagerCounters(debugCounterService);
 		expect(switchManager.getCounters()).andReturn(counters).anyTimes();
+		setupDefaultMockBehaviour(switchManager);
 		replay(switchManager);
 		connection = new MockOFConnection(featuresReply.getDatapathId(), OFAuxId.MAIN);
 		switchHandler = new OFSwitchHandshakeHandler(connection, featuresReply, switchManager, roleManager, timer);
@@ -168,6 +169,11 @@ public abstract class OFSwitchHandlerTestBase {
 	@After
 	public void tearDown() {
 		verifyAll();
+	}
+
+	protected void setupDefaultMockBehaviour(IOFSwitchManager mock) {
+		expect(mock.getInitialControllerRole(anyObject(DatapathId.class)))
+				.andStubReturn(OFControllerRole.ROLE_MASTER);
 	}
 
 	private void verifyAll() {
@@ -519,6 +525,7 @@ public abstract class OFSwitchHandlerTestBase {
 		boolean supportsNxRole = false;
 		verify(switchManager);
 		reset(sw, switchManager);
+		setupDefaultMockBehaviour(switchManager);
 		expect(sw.getAttribute(IOFSwitch.SWITCH_SUPPORTS_NX_ROLE))
 		.andReturn(supportsNxRole).atLeastOnce();
 		// TODO: hmmm. While it's not incorrect that we set the attribute

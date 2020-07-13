@@ -92,6 +92,7 @@ public class OFSwitchHandshakeHandlerVer10Test extends OFSwitchHandlerTestBase {
         replay(sw);
 
         reset(switchManager);
+        setupDefaultMockBehaviour(switchManager);
         expect(switchManager.getHandshakePlugins()).andReturn(plugins).anyTimes();
         expect(
                switchManager.getOFSwitchInstance(anyObject(OFConnection.class),
