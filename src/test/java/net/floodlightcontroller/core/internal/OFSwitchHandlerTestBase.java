@@ -536,12 +536,6 @@ public abstract class OFSwitchHandlerTestBase {
 		expect(sw.getNumTables()).andStubReturn((short)0);
 		sw.setAttribute(IOFSwitch.SWITCH_SUPPORTS_NX_ROLE, supportsNxRole);
 		expectLastCall().anyTimes();
-		if (SwitchStatus.MASTER == newStatus) {
-			if (factory.getVersion().compareTo(OFVersion.OF_13) >= 0) {
-				expect(sw.getTables()).andReturn(Collections.EMPTY_LIST).once();
-				expect(sw.getTableFeatures(TableId.ZERO)).andReturn(TableFeatures.of(createTableFeaturesStatsReply().getEntries().get(0))).anyTimes();
-			}
-		}
 
 		sw.setControllerRole(role);
 		expectLastCall().once();
@@ -706,10 +700,6 @@ public abstract class OFSwitchHandlerTestBase {
 		expect(sw.getStatus()).andReturn(SwitchStatus.HANDSHAKE).once();
 		sw.setStatus(SwitchStatus.MASTER);
 		expectLastCall().once();
-		if (factory.getVersion().compareTo(OFVersion.OF_13) >= 0) {
-			expect(sw.getTables()).andReturn(Collections.EMPTY_LIST).once();
-			expect(sw.getTableFeatures(TableId.ZERO)).andReturn(TableFeatures.of(createTableFeaturesStatsReply().getEntries().get(0))).anyTimes();
-		}
 		replay(sw);
 
 		// FIXME: shouldn't use ordinal(), but OFError is broken
@@ -767,10 +757,6 @@ public abstract class OFSwitchHandlerTestBase {
 		expect(sw.getStatus()).andReturn(SwitchStatus.HANDSHAKE).once();
 		sw.setStatus(SwitchStatus.MASTER);
 		expectLastCall().once();
-		if (factory.getVersion().compareTo(OFVersion.OF_13) >= 0) {
-			expect(sw.getTables()).andReturn(Collections.EMPTY_LIST).once();
-			expect(sw.getTableFeatures(TableId.ZERO)).andReturn(TableFeatures.of(createTableFeaturesStatsReply().getEntries().get(0))).anyTimes();
-		}
 		replay(sw);
 
 		OFMessage m = factory.barrierReply();

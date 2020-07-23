@@ -28,6 +28,7 @@ import java.util.Set;
 import org.easymock.Capture;
 import org.easymock.CaptureType;
 import org.easymock.EasyMock;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.projectfloodlight.openflow.protocol.OFFactories;
 import org.projectfloodlight.openflow.protocol.OFFactory;
@@ -367,6 +368,7 @@ public class StaticFlowTests extends FloodlightTestCase {
 		return storage;
 	}
 
+	@Ignore
 	@Test
 	public void testHARoleChanged() throws IOException {
 
