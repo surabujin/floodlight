@@ -30,6 +30,7 @@ import net.floodlightcontroller.core.module.IFloodlightModule;
 import net.floodlightcontroller.core.module.IFloodlightService;
 import net.floodlightcontroller.debugcounter.DebugCounterServiceImpl;
 
+import org.projectfloodlight.openflow.protocol.OFControllerRole;
 import org.projectfloodlight.openflow.protocol.OFFactory;
 import org.projectfloodlight.openflow.protocol.OFMessage;
 import org.projectfloodlight.openflow.protocol.OFPortDesc;
@@ -66,6 +67,11 @@ public class MockSwitchManager implements IFloodlightModule, IOFSwitchManager, I
     @Override
     public void handshakeDisconnected(DatapathId dpid) {
         // do nothing
+    }
+
+    @Override
+    public OFControllerRole getInitialControllerRole(DatapathId dpid) {
+        return OFControllerRole.ROLE_MASTER;
     }
 
     @Override

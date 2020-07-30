@@ -12,6 +12,7 @@ import net.floodlightcontroller.core.LogicalOFMessageCategory;
 import net.floodlightcontroller.core.PortChangeType;
 import net.floodlightcontroller.core.SwitchDescription;
 
+import org.projectfloodlight.openflow.protocol.OFControllerRole;
 import org.projectfloodlight.openflow.protocol.OFFactory;
 import org.projectfloodlight.openflow.protocol.OFMessage;
 import org.projectfloodlight.openflow.protocol.OFPortDesc;
@@ -129,4 +130,5 @@ public interface IOFSwitchManager {
 
     void handshakeDisconnected(DatapathId dpid);
 
+    OFControllerRole getInitialControllerRole(DatapathId dpid);
 }
